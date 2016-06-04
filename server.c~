@@ -32,10 +32,9 @@
 			/* send */
       			addr.sin_addr.s_addr = inet_addr(EXAMPLE_GROUP);
       			while (1) {
-	 	sprintf(message, port, %d);
-	 	printf("sending: %s\n", message);
-	 	cnt = sendto(sock, message, sizeof(message), 0,
-		      (struct sockaddr *) &addr, addrlen);
+	 			
+	 			printf("sending: %d\n", port);
+	 			cnt = sendto(sock, port, sizeof(port), 0,(struct sockaddr *) &addr, addrlen);
 	 	if (cnt < 0) {
  	    		perror("sendto");
 	    		exit(1);
