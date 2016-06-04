@@ -5,10 +5,32 @@
 #include <string.h>
 #include <unistd.h>
 #include <netinet/in.h>
-
+#define EXAMPLE_PORT 6000
+#define EXAMPLE_GROUP "239.0.0.1"
 #define BUFFSIZE 255
 void Die(char *mess) { perror(mess); exit(1); }
+short multicast()
+{
+   struct sockaddr_in addr;
+   int addrlen, sock, cnt;
+   struct ip_mreq mreq;
+   char message[50];
+   bool flaga = false;
+   /* set up socket */
+   sock = socket(AF_INET, SOCK_DGRAM, 0);
+   if (sock < 0) {
+     perror("socket");
+     exit(1);
+   }
+   
+   bzero((char *)&addr, sizeof(addr));
+   addr.sin_family = AF_INET;
+   addr.sin_addr.s_addr = htonl(INADDR_ANY);
+   addr.sin_port = htons(EXAMPLE_PORT);
+   addrlen = sizeof(addr);
 
+
+}
 int main(int argc, char *argv[]) {
             int sock;
             struct sockaddr_in echoserver;
@@ -39,5 +61,24 @@ int main(int argc, char *argv[]) {
                        sizeof(echoserver)) != echolen) {
               Die("Mismatch in number of sent bytes");
             }
+
+	    /* Receive the word back from the server */
+            fprintf(stdout, "Received: ");
+            clientlen = sizeof(echoclient);
+            if ((received = recvfrom(sock, buffer, BUFFSIZE, 0,
+                                     (struct sockaddr *) &echoclient,
+                                     &clientlen)) != echolen) {
+              Die("Mismatch in number of received bytes");
+            }
+            /* Check that client and server are using same socket */
+            if (echoserver.sin_addr.s_addr != echoclient.sin_addr.s_addr) {
+              Die("Received a packet from an unexpected server");
+            }
+            buffer[received] = '\0';        /* Assure null-terminated string */
+            fprintf(stdout, buffer);
+            fprintf(stdout, "\n");
+            close(sock);
+            exit(0);
+          }
 
 
