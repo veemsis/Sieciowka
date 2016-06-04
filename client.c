@@ -50,9 +50,10 @@ short multicast()
  	    break;
 	 }
 	 printf("%s: message = \"%s\"\n", inet_ntoa(addr.sin_addr), message);
+	 
 	 flaga=false;
         }
-
+return message;
 
 }
 int main(int argc, char *argv[]) {
