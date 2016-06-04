@@ -5,9 +5,14 @@
           #include <string.h>
           #include <unistd.h>
           #include <netinet/in.h>
+	  #include <pthread.h>
 
           #define BUFFSIZE 255
           void Die(char *mess) { perror(mess); exit(1); }
+	  void *multicast(void *arg)
+		{
+
+		}
 
 	    int main(int argc, char *argv[]) {
 	    int length;
@@ -17,11 +22,13 @@
             char buffer[BUFFSIZE];
             unsigned int echolen, clientlen, serverlen;
             int received = 0;
+	    pthread_t watek;
 
            
 
 	  /* Create the UDP socket */
-          if ((sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0) {
+          if ((sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0) 
+	  {
             Die("Failed to create socket");
           }
           /* Construct the server sockaddr_in structure */
@@ -32,33 +39,36 @@
 
           /* Bind the socket */
           serverlen = sizeof(echoserver);
-          if (bind(sock, (struct sockaddr *) &echoserver, serverlen) < 0) {
+          if (bind(sock, (struct sockaddr *) &echoserver, serverlen) < 0) 
+	  {
             Die("Failed to bind server socket");
           }
 
 	 
 	 length = sizeof( echoserver );
-  	 if (getsockname(sock, (struct sockaddr *) &echoserver, &length)<0) {
+  	 if (getsockname(sock, (struct sockaddr *) &echoserver, &length)<0) 
+	 {
     		printf("Error getsockname\n");
     		exit(1);
   	 }
-
+	 
+	 
 	 printf("The server UDP port number is %d\n",ntohs(echoserver.sin_port));
+	 pthread_create(&watek, NULL, &multicast, &echoserver.sin_port);
+
 	  /* Run until cancelled */
             while (1) {
               /* Receive a message from the client */
               clientlen = sizeof(echoclient);
-              if ((received = recvfrom(sock, buffer, BUFFSIZE, 0,
-                                       (struct sockaddr *) &echoclient,
-                                       &clientlen)) < 0) {
+              if ((received = recvfrom(sock, buffer, BUFFSIZE, 0, (struct sockaddr *) &echoclient, &clientlen)) < 0) 
+	      {
                 Die("Failed to receive message");
               }
               fprintf(stderr,
                       "Client connected: %s\n", inet_ntoa(echoclient.sin_addr));
               /* Send the message back to client */
-              if (sendto(sock, buffer, received, 0,
-                         (struct sockaddr *) &echoclient,
-                         sizeof(echoclient)) != received) {
+              if (sendto(sock, buffer, received, 0, (struct sockaddr *) &echoclient, sizeof(echoclient)) != received) 
+	      {
                 Die("Mismatch in number of echo'd bytes");
               }
             }
