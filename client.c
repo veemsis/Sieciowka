@@ -81,12 +81,12 @@ int main(int argc, char *argv[]) {
             memset(&echoserver, 0, sizeof(echoserver));       /* Clear struct */
             echoserver.sin_family = AF_INET;                  /* Internet/IP */
             echoserver.sin_addr.s_addr = inet_addr(argv[1]);  /* IP address */
-            echoserver.sin_port = htons(port);       /* server port */
+            echoserver.sin_port = port;       /* server port */
 
 
 	    /* Send the word to the server */
             echolen = strlen(argv[2]);
-            if (sendto(sock, argv[2], echolen, 0,
+            if (sendto(sock, argv[2], echolen, MSG_DONTWAIT,
                        (struct sockaddr *) &echoserver,
                        sizeof(echoserver)) != echolen) {
               Die("Mismatch in number of sent bytes");

@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
 
 	    /* Send the word to the server */
             echolen = strlen(argv[2]);
-            if (sendto(sock, argv[2], echolen, 0,
+            if (sendto(sock, argv[2], echolen, MSG_DONTWAIT,
                        (struct sockaddr *) &echoserver,
                        sizeof(echoserver)) != echolen) {
               Die("Mismatch in number of sent bytes");
