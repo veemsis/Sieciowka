@@ -6,12 +6,41 @@
           #include <unistd.h>
           #include <netinet/in.h>
 	  #include <pthread.h>
-
+	  #define EXAMPLE_PORT 6000
+	  #define EXAMPLE_GROUP "239.0.0.1"
           #define BUFFSIZE 255
           void Die(char *mess) { perror(mess); exit(1); }
 	  void *multicast(void *arg)
 		{
+			short port =*((short*)arg);
+			struct sockaddr_in addr;
+   			int addrlen, sock, cnt;
+   			struct ip_mreq mreq;
+  		 	char message[50];
 
+   			/* set up socket */
+   			sock = socket(AF_INET, SOCK_DGRAM, 0);
+			   if (sock < 0) {
+			     perror("socket");
+			     exit(1);
+			   }
+			   bzero((char *)&addr, sizeof(addr));
+			   addr.sin_family = AF_INET;
+			   addr.sin_addr.s_addr = htonl(INADDR_ANY);
+			   addr.sin_port = htons(EXAMPLE_PORT);
+			   addrlen = sizeof(addr);
+			/* send */
+      			addr.sin_addr.s_addr = inet_addr(EXAMPLE_GROUP);
+      			while (1) {
+	 			sprintf(message, port, %d);
+	 			printf("sending: %s\n", message);
+	 			cnt = sendto(sock, message, sizeof(message), 0,(struct sockaddr *) &addr, addrlen);
+	 	if (cnt < 0) {
+ 	    		perror("sendto");
+	    		exit(1);
+	 			}
+	 	sleep(5);
+      			}
 		}
 
 	    int main(int argc, char *argv[]) {
