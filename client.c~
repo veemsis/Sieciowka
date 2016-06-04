@@ -5,6 +5,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <netinet/in.h>
+#include <stdbool.h>
 #define EXAMPLE_PORT 6000
 #define EXAMPLE_GROUP "239.0.0.1"
 #define BUFFSIZE 255
@@ -14,8 +15,8 @@ short multicast()
    struct sockaddr_in addr;
    int addrlen, sock, cnt;
    struct ip_mreq mreq;
-   char message[50];
-   bool flaga = false;
+   short message;
+   bool flag = false;
    /* set up socket */
    sock = socket(AF_INET, SOCK_DGRAM, 0);
    if (sock < 0) {
@@ -40,33 +41,38 @@ short multicast()
 	 perror("setsockopt mreq");
 	 exit(1);
       }         
-      while (flaga) {
- 	 cnt = recvfrom(sock, message, sizeof(message), 0, 
+      
+ 	 cnt = recvfrom(sock, &message, sizeof(message), 0, 
 			(struct sockaddr *) &addr, &addrlen);
 	 if (cnt < 0) {
 	    perror("recvfrom");
 	    exit(1);
 	 } else if (cnt == 0) {
- 	    break;
+ 	    
 	 }
-	 printf("%s: message = \"%s\"\n", inet_ntoa(addr.sin_addr), message);
-	 flaga=false;
-        }
-
+	 printf("%s: message = \"%d\"\n", inet_ntoa(addr.sin_addr), message);
+	 
+	 
+        
+return message;
 
 }
 int main(int argc, char *argv[]) {
+
             int sock;
+	    short port;
             struct sockaddr_in echoserver;
             struct sockaddr_in echoclient;
             char buffer[BUFFSIZE];
             unsigned int echolen, clientlen;
             int received = 0;
 
-            if (argc != 4) {
-              fprintf(stderr, "USAGE: %s <server_ip> <word> <port>\n", argv[0]);
+            if (argc != 3) {
+              fprintf(stderr, "USAGE: %s <server_ip> <word> \n", argv[0]);
               exit(1);
             }
+
+	   port = multicast();
           /* Create the UDP socket */
             if ((sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0) {
               Die("Failed to create socket");
@@ -75,7 +81,7 @@ int main(int argc, char *argv[]) {
             memset(&echoserver, 0, sizeof(echoserver));       /* Clear struct */
             echoserver.sin_family = AF_INET;                  /* Internet/IP */
             echoserver.sin_addr.s_addr = inet_addr(argv[1]);  /* IP address */
-            echoserver.sin_port = htons(atoi(argv[3]));       /* server port */
+            echoserver.sin_port = htons(port);       /* server port */
 
 
 	    /* Send the word to the server */
